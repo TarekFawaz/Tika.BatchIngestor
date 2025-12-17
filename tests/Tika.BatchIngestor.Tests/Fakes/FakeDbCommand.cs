@@ -6,6 +6,7 @@ namespace Tika.BatchIngestor.Tests.Fakes;
 public class FakeDbCommand : DbCommand
 {
     private readonly FakeDbConnection _connection;
+    private string _commandText = string.Empty;
 
     public FakeDbCommand(FakeDbConnection connection)
     {
@@ -13,7 +14,11 @@ public class FakeDbCommand : DbCommand
         DbParameterCollection = new FakeDbParameterCollection();
     }
 
-    public override string CommandText { get; set; } = string.Empty;
+    public override string CommandText
+    {
+        get => _commandText;
+        set => _commandText = value ?? string.Empty;
+    }
     public override int CommandTimeout { get; set; }
     public override CommandType CommandType { get; set; }
     public override bool DesignTimeVisible { get; set; }
@@ -96,12 +101,27 @@ public class FakeDbParameterCollection : DbParameterCollection
 
 public class FakeDbParameter : DbParameter
 {
+    private string _parameterName = string.Empty;
+    private string _sourceColumn = string.Empty;
+
     public override DbType DbType { get; set; }
     public override ParameterDirection Direction { get; set; }
     public override bool IsNullable { get; set; }
-    public override string ParameterName { get; set; } = string.Empty;
+
+    public override string ParameterName
+    {
+        get => _parameterName;
+        set => _parameterName = value ?? string.Empty;
+    }
+
     public override int Size { get; set; }
-    public override string SourceColumn { get; set; } = string.Empty;
+
+    public override string SourceColumn
+    {
+        get => _sourceColumn;
+        set => _sourceColumn = value ?? string.Empty;
+    }
+
     public override bool SourceColumnNullMapping { get; set; }
     public override object? Value { get; set; }
 
