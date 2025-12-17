@@ -283,7 +283,7 @@ graph TB
 
 ```mermaid
 sequenceDiagram
-    participant Data as IAsyncEnumerable&lt;T&gt;
+    participant Data as IAsyncEnumerable<T>
     participant Producer as Producer Task
     participant Channel as Bounded Channel
     participant Consumer1 as Consumer Task 1
