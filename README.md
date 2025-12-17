@@ -90,15 +90,6 @@ var metrics = await ingestor.IngestAsync(data, "Customers");
 Console.WriteLine($"Ingested {metrics.TotalRowsProcessed:N0} rows in {metrics.ElapsedTime}");
 ```
 
-## 📚 Documentation
-
-For detailed documentation, see:
-- [Design Document](docs/design.md) - Architecture and design decisions
-- [API Reference](https://github.com/TarekFawaz/Tika.BatchIngestor/wiki) - Full API documentation
-
-## 🎛️ Configuration
-
-## 🎛️ Configuration Guide
 
 ### Recommended Defaults
 
