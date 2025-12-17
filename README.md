@@ -1,3 +1,6 @@
+> **⚠️ Important Note**  
+> This entire concept is created for educational purposes for beginners; however, it is designed to be *high-performance and production-ready*.
+
 # Tika.BatchIngestor
 
 [![NuGet](https://img.shields.io/nuget/v/Tika.BatchIngestor.svg)](https://www.nuget.org/packages/Tika.BatchIngestor/)
