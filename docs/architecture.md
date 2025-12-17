@@ -1,6 +1,10 @@
+> **⚠️ Important Note**  
+> This entire concept is created for educational purposes for beginners; however, it is designed to be *high-performance and production-ready*.
+
 # Architecture Overview
 
 This document describes the architecture of Tika.BatchIngestor using the C4 model (Context, Containers, Components, and Code).
+
 
 ## Table of Contents
 
