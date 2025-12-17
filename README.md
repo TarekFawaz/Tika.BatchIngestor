@@ -160,7 +160,7 @@ The library includes several performance optimizations:
 
 ```csharp
 // In Startup.cs or Program.cs
-services.AddSingleton<IHealthCheckPublisher, BatchIngestorHealthCheckPublisher>();
+services.AddSingleton<IBatchIngestorHealthCheckPublisher, BatchIngestorHealthCheckPublisher>();
 
 services.AddHealthChecks()
     .AddBatchIngestorHealthCheck("batch-ingestor");
