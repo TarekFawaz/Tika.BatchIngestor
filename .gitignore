@@ -75,3 +75,5 @@ _ReSharper*/
 *.[Rr]e[Ss]harper
 *.DotSettings.user
 /DEPLOYMENT_GUIDE.md
+*.md
+/REPOSITORY_SUMMARY.txt
