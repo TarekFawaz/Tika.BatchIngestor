@@ -96,40 +96,45 @@ public class BatchIngestMetrics
 
     /// <summary>
     /// Increments the total rows processed counter.
+    /// Thread-safe using atomic operations.
     /// </summary>
-    internal void AddRowsProcessed(long count)
+    public void AddRowsProcessed(long count)
     {
         Interlocked.Add(ref _totalRowsProcessed, count);
     }
 
     /// <summary>
     /// Increments the batches completed counter.
+    /// Thread-safe using atomic operations.
     /// </summary>
-    internal void IncrementBatchesCompleted()
+    public void IncrementBatchesCompleted()
     {
         Interlocked.Increment(ref _batchesCompleted);
     }
 
     /// <summary>
     /// Increments the error counter.
+    /// Thread-safe using atomic operations.
     /// </summary>
-    internal void IncrementErrorCount()
+    public void IncrementErrorCount()
     {
         Interlocked.Increment(ref _errorCount);
     }
 
     /// <summary>
     /// Increments the retry counter.
+    /// Thread-safe using atomic operations.
     /// </summary>
-    internal void IncrementRetryCount()
+    public void IncrementRetryCount()
     {
         Interlocked.Increment(ref _retryCount);
     }
 
     /// <summary>
     /// Records a batch duration using lock-free atomic operations.
+    /// Thread-safe and updates min, max, and average batch durations.
     /// </summary>
-    internal void RecordBatchDuration(TimeSpan duration)
+    public void RecordBatchDuration(TimeSpan duration)
     {
         var ticks = duration.Ticks;
         Interlocked.Add(ref _totalBatchDurationTicks, ticks);
@@ -153,8 +158,9 @@ public class BatchIngestMetrics
 
     /// <summary>
     /// Updates performance snapshot if provided snapshot has higher CPU usage.
+    /// Updates both current and peak performance tracking.
     /// </summary>
-    internal void UpdatePeakPerformance(PerformanceSnapshot snapshot)
+    public void UpdatePeakPerformance(PerformanceSnapshot snapshot)
     {
         if (PeakPerformance == null || snapshot.CpuUsagePercent > PeakPerformance.CpuUsagePercent)
         {
