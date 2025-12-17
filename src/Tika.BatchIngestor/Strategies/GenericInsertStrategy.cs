@@ -43,10 +43,13 @@ public class GenericInsertStrategy<T> : IBulkInsertStrategy<T>
         var totalInserted = 0;
         var commandBuilder = new SqlCommandBuilder(_dialect, _options);
 
+        // Process in chunks without creating intermediate collections
         for (int i = 0; i < rows.Count; i += maxRowsPerCommand)
         {
             var chunkSize = Math.Min(maxRowsPerCommand, rows.Count - i);
-            var chunk = rows.Skip(i).Take(chunkSize).ToList();
+
+            // Create a view of the chunk without allocating a new list
+            var chunk = new ListSegment<T>(rows, i, chunkSize);
 
             using var command = commandBuilder.BuildInsertCommand(
                 connection,
@@ -60,5 +63,43 @@ public class GenericInsertStrategy<T> : IBulkInsertStrategy<T>
         }
 
         return totalInserted;
+    }
+
+    /// <summary>
+    /// Zero-allocation list segment wrapper.
+    /// </summary>
+    private readonly struct ListSegment<TItem> : IReadOnlyList<TItem>
+    {
+        private readonly IReadOnlyList<TItem> _list;
+        private readonly int _offset;
+        private readonly int _count;
+
+        public ListSegment(IReadOnlyList<TItem> list, int offset, int count)
+        {
+            _list = list;
+            _offset = offset;
+            _count = count;
+        }
+
+        public TItem this[int index]
+        {
+            get
+            {
+                if (index < 0 || index >= _count)
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                return _list[_offset + index];
+            }
+        }
+
+        public int Count => _count;
+
+        public IEnumerator<TItem> GetEnumerator()
+        {
+            for (int i = 0; i < _count; i++)
+                yield return _list[_offset + i];
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            => GetEnumerator();
     }
 }

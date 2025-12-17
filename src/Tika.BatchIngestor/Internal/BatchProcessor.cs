@@ -16,9 +16,10 @@ internal class BatchProcessor<T>
     private readonly BatchIngestMetrics _metrics;
     private readonly ILogger? _logger;
     private readonly RetryExecutor _retryExecutor;
+    private readonly PerformanceMetrics? _performanceMetrics;
+    private readonly Timer? _metricsTimer;
 
     private int _batchCounter;
-    private long _totalBatchDurationMs;
 
     public BatchProcessor(
         IConnectionFactory connectionFactory,
@@ -36,6 +37,35 @@ internal class BatchProcessor<T>
         _metrics = metrics;
         _logger = options.Logger;
         _retryExecutor = new RetryExecutor(options.RetryPolicy, _logger);
+
+        if (_options.EnablePerformanceMetrics)
+        {
+            _performanceMetrics = new PerformanceMetrics();
+            _metricsTimer = new Timer(
+                _ => CollectPerformanceMetrics(),
+                null,
+                TimeSpan.FromMilliseconds(_options.PerformanceMetricsIntervalMs),
+                TimeSpan.FromMilliseconds(_options.PerformanceMetricsIntervalMs));
+        }
+    }
+
+    private void CollectPerformanceMetrics()
+    {
+        if (_performanceMetrics == null) return;
+
+        var snapshot = _performanceMetrics.CreateSnapshot();
+        _metrics.UpdatePeakPerformance(snapshot);
+
+        if (_options.EnableCpuThrottling && _options.MaxCpuPercent > 0)
+        {
+            if (snapshot.CpuUsagePercent > _options.MaxCpuPercent)
+            {
+                _logger?.LogWarning(
+                    "CPU usage ({Cpu:F2}%) exceeds threshold ({Threshold:F2}%). Throttling enabled.",
+                    snapshot.CpuUsagePercent,
+                    _options.MaxCpuPercent);
+            }
+        }
     }
 
     public async Task ProcessAsync(IAsyncEnumerable<T> data, CancellationToken cancellationToken)
@@ -67,6 +97,7 @@ internal class BatchProcessor<T>
     {
         try
         {
+            // Reuse list instance with capacity pre-allocated
             var batch = new List<T>(_options.BatchSize);
 
             await foreach (var item in data.WithCancellation(cancellationToken))
@@ -75,11 +106,15 @@ internal class BatchProcessor<T>
 
                 if (batch.Count >= _options.BatchSize)
                 {
+                    // Send the batch to consumers
                     await writer.WriteAsync(batch, cancellationToken);
+
+                    // Create new batch with same capacity for better memory allocation
                     batch = new List<T>(_options.BatchSize);
                 }
             }
 
+            // Send remaining items
             if (batch.Count > 0)
             {
                 await writer.WriteAsync(batch, cancellationToken);
@@ -104,6 +139,23 @@ internal class BatchProcessor<T>
     private async Task ProcessBatchAsync(List<T> batch, CancellationToken cancellationToken)
     {
         var batchNumber = Interlocked.Increment(ref _batchCounter);
+
+        // CPU throttling check
+        if (_options.EnableCpuThrottling && _options.MaxCpuPercent > 0 && _performanceMetrics != null)
+        {
+            var cpuUsage = _performanceMetrics.CpuUsagePercent;
+            if (cpuUsage > _options.MaxCpuPercent)
+            {
+                _logger?.LogDebug(
+                    "Throttling batch {BatchNumber} - CPU: {Cpu:F2}% > {Threshold:F2}%",
+                    batchNumber,
+                    cpuUsage,
+                    _options.MaxCpuPercent);
+
+                await Task.Delay(_options.ThrottleDelayMs, cancellationToken);
+            }
+        }
+
         var stopwatch = Stopwatch.StartNew();
 
         try
@@ -164,21 +216,10 @@ internal class BatchProcessor<T>
             stopwatch.Stop();
             var duration = stopwatch.Elapsed;
 
-            lock (_metrics)
-            {
-                _metrics.TotalRowsProcessed += batch.Count;
-                _metrics.BatchesCompleted++;
-                
-                _totalBatchDurationMs += (long)duration.TotalMilliseconds;
-                _metrics.AverageBatchDuration = TimeSpan.FromMilliseconds(
-                    _totalBatchDurationMs / (double)_metrics.BatchesCompleted);
-
-                if (duration < _metrics.MinBatchDuration)
-                    _metrics.MinBatchDuration = duration;
-
-                if (duration > _metrics.MaxBatchDuration)
-                    _metrics.MaxBatchDuration = duration;
-            }
+            // Use lock-free atomic operations
+            _metrics.AddRowsProcessed(batch.Count);
+            _metrics.IncrementBatchesCompleted();
+            _metrics.RecordBatchDuration(duration);
 
             _options.OnBatchCompleted?.Invoke(batchNumber, duration);
 
@@ -196,11 +237,8 @@ internal class BatchProcessor<T>
         catch (Exception ex)
         {
             _logger?.LogError(ex, "Failed to process batch {BatchNumber}", batchNumber);
-            
-            lock (_metrics)
-            {
-                _metrics.ErrorCount++;
-            }
+
+            _metrics.IncrementErrorCount();
 
             throw new BatchIngestException(
                 $"Failed to process batch {batchNumber}",

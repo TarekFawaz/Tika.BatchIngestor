@@ -57,7 +57,7 @@ public class FakeConnectionFactory : IConnectionFactory
         public override string ConnectionString
         {
             get => _inner.ConnectionString;
-            set => _inner.ConnectionString = value;
+            set => _inner.ConnectionString = value!;
         }
 
         public override string Database => _inner.Database;

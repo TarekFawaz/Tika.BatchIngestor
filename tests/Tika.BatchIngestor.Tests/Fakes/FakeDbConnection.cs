@@ -6,8 +6,14 @@ namespace Tika.BatchIngestor.Tests.Fakes;
 public class FakeDbConnection : DbConnection
 {
     private ConnectionState _state = ConnectionState.Closed;
+    private string _connectionString = string.Empty;
 
-    public override string ConnectionString { get; set; } = string.Empty;
+    public override string ConnectionString
+    {
+        get => _connectionString;
+        set => _connectionString = value ?? string.Empty;
+    }
+
     public override string Database => "FakeDatabase";
     public override string DataSource => "FakeDataSource";
     public override string ServerVersion => "1.0";

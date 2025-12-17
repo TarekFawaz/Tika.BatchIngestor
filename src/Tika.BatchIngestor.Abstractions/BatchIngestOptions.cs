@@ -62,6 +62,36 @@ public class BatchIngestOptions
     public ILogger? Logger { get; set; }
 
     /// <summary>
+    /// Enable CPU usage monitoring and throttling. Default is true.
+    /// </summary>
+    public bool EnableCpuThrottling { get; set; } = true;
+
+    /// <summary>
+    /// Maximum CPU usage percentage threshold (0-100).
+    /// When exceeded, processing will throttle. Default is 80%.
+    /// Set to 0 to disable throttling.
+    /// </summary>
+    public double MaxCpuPercent { get; set; } = 80.0;
+
+    /// <summary>
+    /// Throttle delay in milliseconds when CPU exceeds threshold.
+    /// Default is 100ms.
+    /// </summary>
+    public int ThrottleDelayMs { get; set; } = 100;
+
+    /// <summary>
+    /// Enable real-time performance metrics collection (CPU, memory).
+    /// Default is true.
+    /// </summary>
+    public bool EnablePerformanceMetrics { get; set; } = true;
+
+    /// <summary>
+    /// Interval in milliseconds to collect performance metrics.
+    /// Default is 1000ms (1 second).
+    /// </summary>
+    public int PerformanceMetricsIntervalMs { get; set; } = 1000;
+
+    /// <summary>
     /// Validates the options and throws if invalid.
     /// </summary>
     public void Validate()
@@ -77,5 +107,14 @@ public class BatchIngestOptions
 
         if (CommandTimeoutSeconds < 0)
             throw new ArgumentException("CommandTimeoutSeconds cannot be negative.", nameof(CommandTimeoutSeconds));
+
+        if (MaxCpuPercent < 0 || MaxCpuPercent > 100)
+            throw new ArgumentException("MaxCpuPercent must be between 0 and 100.", nameof(MaxCpuPercent));
+
+        if (ThrottleDelayMs < 0)
+            throw new ArgumentException("ThrottleDelayMs cannot be negative.", nameof(ThrottleDelayMs));
+
+        if (PerformanceMetricsIntervalMs <= 0)
+            throw new ArgumentException("PerformanceMetricsIntervalMs must be greater than 0.", nameof(PerformanceMetricsIntervalMs));
     }
 }
