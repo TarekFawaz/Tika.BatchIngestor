@@ -99,10 +99,18 @@ internal static class EnumerableExtensions
 {
     public static async IAsyncEnumerable<T> ToAsyncEnumerable<T>(this IEnumerable<T> source)
     {
+        const int batchSize = 1000; // Yield control every N items instead of every item
+        int count = 0;
+
         foreach (var item in source)
         {
             yield return item;
-            await Task.Yield();
+
+            // Only yield control periodically to avoid excessive context switching
+            if (++count % batchSize == 0)
+            {
+                await Task.Yield();
+            }
         }
     }
 }
