@@ -53,12 +53,20 @@ try
 
     var options = new BatchIngestOptions
     {
-        BatchSize = 5000,
+        BatchSize = 1000,
         MaxDegreeOfParallelism = 1,
-        MaxInFlightBatches = 5,
+        MaxInFlightBatches = 50,
         UseTransactions = true,
         TransactionPerBatch = true,
-        CommandTimeoutSeconds = 300,
+
+        // NEW: CPU Throttling (keeps CPU under x%)
+        EnableCpuThrottling = true,
+        MaxCpuPercent = 50.0,
+        ThrottleDelayMs = 100,
+
+        // NEW: Performance Metrics
+        EnablePerformanceMetrics = true,
+        PerformanceMetricsIntervalMs = 1000,
         RetryPolicy = new RetryPolicy
         {
             MaxRetries = 3,
@@ -68,12 +76,12 @@ try
         },
         OnProgress = metrics =>
         {
-            progress.Update(
-                metrics.TotalRowsProcessed,
-                metrics.RowsPerSecond,
-                metrics.ElapsedTime
-            );
+            Console.WriteLine($"Progress: {metrics.TotalRowsProcessed:N0} rows, " +                             
+                             $"CPU: {metrics.CurrentPerformance?.CpuUsagePercent:F2}%, " +
+                             $"Memory: {metrics.CurrentPerformance?.WorkingSetMB:F2}MB");
         },
+        
+       
         Logger = logger
     };
 

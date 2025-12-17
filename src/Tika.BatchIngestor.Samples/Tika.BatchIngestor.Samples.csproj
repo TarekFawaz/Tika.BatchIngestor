@@ -8,8 +8,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.0" />
-    <PackageReference Include="Tika.BatchIngestor" Version="1.0.0" />
-    <PackageReference Include="Tika.BatchIngestor.Abstractions" Version="1.0.0" />
+    <PackageReference Include="Tika.BatchIngestor" Version="1.1.0" />
+    <PackageReference Include="Tika.BatchIngestor.Abstractions" Version="1.1.0" />
   </ItemGroup>
 
 </Project>
