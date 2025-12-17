@@ -5,7 +5,7 @@ namespace Tika.BatchIngestor.HealthChecks;
 /// <summary>
 /// Default implementation of health check publisher for batch ingestion.
 /// </summary>
-public class BatchIngestorHealthCheckPublisher : IHealthCheckPublisher
+public class BatchIngestorHealthCheckPublisher : IBatchIngestorHealthCheckPublisher
 {
     private readonly BatchIngestMetrics _metrics;
     private readonly PerformanceMetrics? _performanceMetrics;

@@ -3,7 +3,7 @@ namespace Tika.BatchIngestor.Abstractions;
 /// <summary>
 /// Provides health check information for batch ingestion operations.
 /// </summary>
-public interface IHealthCheckPublisher
+public interface IBatchIngestorHealthCheckPublisher
 {
     /// <summary>
     /// Gets the current health status.

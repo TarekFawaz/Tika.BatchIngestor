@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.DependencyInjection;
 using Tika.BatchIngestor.Abstractions;
 
 namespace Tika.BatchIngestor.HealthChecks;
@@ -9,9 +10,9 @@ namespace Tika.BatchIngestor.HealthChecks;
 /// </summary>
 public class BatchIngestorHealthCheck : IHealthCheck
 {
-    private readonly IHealthCheckPublisher _healthCheckPublisher;
+    private readonly IBatchIngestorHealthCheckPublisher _healthCheckPublisher;
 
-    public BatchIngestorHealthCheck(IHealthCheckPublisher healthCheckPublisher)
+    public BatchIngestorHealthCheck(IBatchIngestorHealthCheckPublisher healthCheckPublisher)
     {
         _healthCheckPublisher = healthCheckPublisher ?? throw new ArgumentNullException(nameof(healthCheckPublisher));
     }
