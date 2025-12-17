@@ -21,7 +21,7 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageTags>batch;insert;database;bulk;ado.net;performance;ingestion;sql;rdbms</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageIcon>icon.png</PackageIcon>
+    <PackageIconUrl>icon.png</PackageIconUrl>
     
     <!-- Version - can be overridden by CI/CD -->
     <VersionPrefix>1.0.0</VersionPrefix>
