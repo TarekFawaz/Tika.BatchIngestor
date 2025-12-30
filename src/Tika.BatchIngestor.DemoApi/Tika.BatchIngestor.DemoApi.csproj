@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Tika.BatchIngestor.DemoApi</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tika.BatchIngestor.Abstractions\Tika.BatchIngestor.Abstractions.csproj" />
+    <ProjectReference Include="..\Tika.BatchIngestor\Tika.BatchIngestor.csproj" />
+    <ProjectReference Include="..\Tika.BatchIngestor.Extensions.DependencyInjection\Tika.BatchIngestor.Extensions.DependencyInjection.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
+    <PackageReference Include="Npgsql" Version="8.0.0" />
+  </ItemGroup>
+
+</Project>
